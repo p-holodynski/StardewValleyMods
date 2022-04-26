@@ -58,7 +58,7 @@ namespace MoreClocks
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.UpdateTicking += this.OnUpdateTicking;
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-            //this.Monitor.Log($"{}", LogLevel.Debug);
+
             this.iridiumClockTexture = this.Helper.Content.Load<Texture2D>("assets/IridiumClock.png");
             this.radioactiveClockTexture = this.Helper.Content.Load<Texture2D>("assets/RadioactiveClock.png");
             this.randomvalue = new Random();
