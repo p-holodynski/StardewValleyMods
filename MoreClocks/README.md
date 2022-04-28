@@ -15,7 +15,7 @@ Allows you to change how long it takes for various machines (e.g. kegs, oil make
 - No known mod conflicts (let me know if you find one).
 - Should be compatible with SMAPI 3.0.0 once it is released.
 
-![](screenshot.png)
+![](MoreClocks.png)
 
 ## How To Use:
 1. Run the game using SMAPI at least once to generate a `config.json` file inside `Stardew Valley/Mods/ConfigureMachineSpeed`.
