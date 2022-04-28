@@ -6,5 +6,5 @@
   "UniqueID": "phjoker.MoreClocks",
   "EntryDll": "MoreClocks.dll",
   "MinimumApiVersion": "3.0.0",
-  "UpdateKeys": []
+  "UpdateKeys": [ "Nexus:11840" ]
 }

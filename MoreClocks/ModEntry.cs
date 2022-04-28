@@ -420,8 +420,8 @@ namespace MoreClocks
 
         public void Edit<T>(IAssetData asset)
         {
-            asset.AsDictionary<string, string>().Data.Add("Iridium Clock", "/3/2/-1/-1/-2/-1/null/Iridium Clock/Makes all seeds plantable on your farm regardless of the season./Buildings/none/48/80/-1/null/Farm/15000/true");
-            asset.AsDictionary<string, string>().Data.Add("Radioactive Clock", "/3/2/-1/-1/-2/-1/null/Radioactive Clock/Improves speed and quality of machines and crops on your farm. Giant Crops spawn more often./Buildings/none/48/80/-1/null/Farm/20000/true");
+            asset.AsDictionary<string, string>().Data.Add("Iridium Clock", "337 100/3/2/-1/-1/-2/-1/null/Iridium Clock/All seeds are plantable regardless of the season. 25% chance overnight to Speed Up machines./Buildings/none/48/80/-1/null/Farm/15000/true");
+            asset.AsDictionary<string, string>().Data.Add("Radioactive Clock", "910 100/3/2/-1/-1/-2/-1/null/Radioactive Clock/Crops have a 25% chance to fully grow overnight. Giant Crops spawn more often./Buildings/none/48/80/-1/null/Farm/15000/true");
         }
 
         public bool CanLoad<T>(IAssetInfo asset)
