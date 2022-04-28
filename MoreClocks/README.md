@@ -1,6 +1,7 @@
 # Stardew Valley Mod: More Clocks
 ![](MoreClocks.png)
-A mod that adds 2 additional Clock buildings to the Wizzard Building Menu as well as adding additional logic to the Gold Clock making it more usable for the end game. All of these additions are aimed for the late end game.
+
+A mod that adds 2 additional Clock buildings (Iridium and Radioactive) to the Wizzard Building Menu with their own custom effects for your farm as well as adding additional effect to the Gold Clock making it more usable for the end game.
 
 ## Installation:
 1. Install the latest version of SMAPI
