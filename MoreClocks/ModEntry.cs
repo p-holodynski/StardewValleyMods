@@ -30,13 +30,15 @@ namespace MoreClocks
         private Texture2D radioactiveClockTexture;
         private bool isGoldClockBuilt = false;
         private bool isIridiumClockBuilt = false;
+        private bool isIridiumClockTriggered = false;
         private bool isRadioactiveClockBuilt = false;
+        private bool isRadioactiveClockTriggered = false;
         private Random randomvalue;
         private float originalDifficultyModifier = 1f;
         private readonly float EPSILON = 0.01f;
         private List<string> machineNames;
-        public uint machineUpdateInterval = 10;
-        public float machineTime = 75f;
+        private uint machineUpdateInterval = 10;
+        private float machineTime = 75f;
 
         /*********
         ** Accessors
@@ -100,8 +102,19 @@ namespace MoreClocks
                     this.isRadioactiveClockBuilt = true;
                 }
             }
+            if (this.isIridiumClockTriggered == true)
+            {
+                Game1.hudMessages.Add(new HUDMessage("Iridium Clock has speed up the machines overnight", 2));
+                this.isIridiumClockTriggered = false;
+            }
+            if (this.isRadioactiveClockTriggered == true)
+            {
+                Game1.hudMessages.Add(new HUDMessage("Radioactive Clock has mutated some crops overnight", 2));
+                this.isRadioactiveClockTriggered = false;
+            }
         }
 
+        // Triggers when a building is added/removed on the farm
         private void OnBuildingListChanged(object sender, BuildingListChangedEventArgs e)
         {
             foreach (Building building in e.Added)
@@ -160,6 +173,8 @@ namespace MoreClocks
                 if (chanceToSpeedUpMachines < 25) // 25% chance to trigger
                 {
                     SpeedUpAllMachines();
+                    this.isIridiumClockTriggered = true;
+                    //this.Monitor.Log("IridiumClockTriggered Machine Speed Up", LogLevel.Debug);
                 }
             }
             if (this.isRadioactiveClockBuilt == true) {
@@ -178,6 +193,7 @@ namespace MoreClocks
                                 if (dirt.crop.currentPhase.Value != dirt.crop.phaseDays.Count - 1)
                                 {
                                     dirt.crop.growCompletely();
+                                    this.isRadioactiveClockTriggered = true;
                                 }
                             }
                         }
@@ -187,6 +203,7 @@ namespace MoreClocks
                 if (chanceToTurnIntoGiantCrop < 25) // 25% chance to trigger
                 {
                     MutateCrops(chanceToTurnIntoGiantCrop, location);
+                    this.isRadioactiveClockTriggered = true;
                 }
             }
         }
@@ -214,7 +231,7 @@ namespace MoreClocks
             //}
         }
 
-
+        // Checks if the crops are fully grown and can become a Giant Crop
         private void MutateCrops(int chance, GameLocation environment)
         {
             foreach (Tuple<Vector2, Crop> tuple in this.GetValidCrops(environment))
@@ -268,6 +285,7 @@ namespace MoreClocks
             }
         }
 
+        // Gets the list of valid crops on the farm
         private List<Tuple<Vector2, Crop>> GetValidCrops(GameLocation environment)
         {
             List<Tuple<Vector2, Crop>> validCrops = new List<Tuple<Vector2, Crop>>();
@@ -287,16 +305,17 @@ namespace MoreClocks
             return validCrops;
         }
 
+        // Triggers when the in game Menu is opened
         private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
             if (e.NewMenu is CarpenterMenu carp)
             {
-                if (this.isGoldClockBuilt == true)
-                {
+                //if (this.isGoldClockBuilt == true)
+                //{
                     var blueprints = this.Helper.Reflection.GetField<List<BluePrint>>(carp, "blueprints").GetValue();
                     blueprints.Add(new BluePrint("Iridium Clock"));
                     blueprints.Add(new BluePrint("Radioactive Clock"));
-                }
+                //}
             }
         }
 
@@ -313,6 +332,7 @@ namespace MoreClocks
             //}
         }
 
+        // Check if the game is in Single Player
         private bool CheckGameContext()
         {
             if (!Context.IsMainPlayer)
@@ -377,10 +397,10 @@ namespace MoreClocks
                         break;
                 }
                 // Configure casks
-                if (Math.Abs(machineTime - 100f) > EPSILON && (int)Math.Round(c.agingRate.Value * 1000) % 10 != 1)
+                if (Math.Abs(this.machineTime - 100f) > EPSILON && (int)Math.Round(c.agingRate.Value * 1000) % 10 != 1)
                 {
                     // By percentage
-                    c.agingRate.Value = agingRate * 100 / machineTime;
+                    c.agingRate.Value = agingRate * 100 / this.machineTime;
                     c.agingRate.Value = (float)Math.Round(c.agingRate.Value, 2);
                     c.agingRate.Value += 0.001f;
                 }
@@ -388,10 +408,10 @@ namespace MoreClocks
             else if (obj.MinutesUntilReady > 0)
             {
                 // Configure all machines other than casks
-                if (Math.Abs(machineTime - 100f) > EPSILON)
+                if (Math.Abs(this.machineTime - 100f) > EPSILON)
                 {
                     // By percentage
-                    obj.MinutesUntilReady = Math.Max(((int)(obj.MinutesUntilReady * machineTime / 100 / 10)) * 10 - 2, 8);
+                    obj.MinutesUntilReady = Math.Max(((int)(obj.MinutesUntilReady * this.machineTime / 100 / 10)) * 10 - 2, 8);
                 }
             }
         }
@@ -420,8 +440,8 @@ namespace MoreClocks
 
         public void Edit<T>(IAssetData asset)
         {
-            asset.AsDictionary<string, string>().Data.Add("Iridium Clock", "337 100/3/2/-1/-1/-2/-1/null/Iridium Clock/All seeds are plantable regardless of the season. 25% chance overnight to Speed Up machines./Buildings/none/48/80/-1/null/Farm/15000000/true");
-            asset.AsDictionary<string, string>().Data.Add("Radioactive Clock", "910 100/3/2/-1/-1/-2/-1/null/Radioactive Clock/Crops have a 25% chance to fully grow overnight. Giant Crops spawn more often./Buildings/none/48/80/-1/null/Farm/15000000/true");
+            asset.AsDictionary<string, string>().Data.Add("Iridium Clock", "337 100/3/2/-1/-1/-2/-1/null/Iridium Clock/All seeds are plantable regardless of the season. 25% chance overnight to Speed Up machines./Buildings/none/48/80/-1/null/Farm/10000000/true");
+            asset.AsDictionary<string, string>().Data.Add("Radioactive Clock", "910 100/3/2/-1/-1/-2/-1/null/Radioactive Clock/Crops have a 25% chance to fully grow overnight. Giant Crops spawn more often./Buildings/none/48/80/-1/null/Farm/10000000/true");
         }
 
         public bool CanLoad<T>(IAssetInfo asset)
