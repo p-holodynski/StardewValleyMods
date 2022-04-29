@@ -16,6 +16,7 @@ using StardewValley.Menus;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
 using StardewValley.Objects;
+using MoreClocks.GenericModConfigMenu;
 
 namespace MoreClocks
 {
@@ -39,11 +40,13 @@ namespace MoreClocks
         private List<string> machineNames;
         private uint machineUpdateInterval = 10;
         private float machineTime = 75f;
+        private ModConfig Config;
 
         /*********
         ** Accessors
         *********/
         public static Mod Instance;
+        
 
         /*********
         ** Public methods
@@ -52,6 +55,9 @@ namespace MoreClocks
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            this.Config = helper.ReadConfig<ModConfig>();
+
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.World.BuildingListChanged += this.OnBuildingListChanged;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             helper.Events.GameLoop.DayEnding += this.OnDayEnding;
@@ -69,6 +75,47 @@ namespace MoreClocks
                 "Furnace", "Incubator", "Keg", "Lightning Rod", "Loom", "Mayonnaise Machine", "Oil Maker",
                 "Preserves Jar", "Recycling Machine", "Seed Maker", "Slime Egg-Press", "Slime Incubator",
                 "Tapper", "Worm Bin"};
+
+            if (this.Config.ProfitMarginEnabled == false)
+            {
+                Game1.player.difficultyModifier = this.originalDifficultyModifier;
+            }
+        }
+
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            // get Generic Mod Config Menu's API (if it's installed)
+            var configMenu = this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            if (configMenu is null)
+                return;
+
+            // register mod
+            configMenu.Register(
+                mod: this.ModManifest,
+                reset: () => this.Config = new ModConfig(),
+                save: () => this.Helper.WriteConfig(this.Config)
+            );
+
+            configMenu.SetTitleScreenOnlyForNextOptions(mod: this.ModManifest, true);
+
+            // add some config options
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Gold Clock Profit Margin Effect",
+                tooltip: () => "Enable the Gold Clock Profit Margin Effect",
+                getValue: () => this.Config.ProfitMarginEnabled,
+                setValue: value => this.Config.ProfitMarginEnabled = value
+            );
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                name: () => "Profit Margin Value",
+                tooltip: () => "Percentage of Profit Margin: 0.25 means 25% more profits, 1 means 100% more(double) profits",
+                getValue: () => this.Config.ProfitMarginValue,
+                setValue: value => this.Config.ProfitMarginValue = value,
+                min: 0f,
+                max: 1f,
+                interval: 0.25f
+            );            
         }
 
         /*********
@@ -88,8 +135,10 @@ namespace MoreClocks
                     this.isGoldClockBuilt = true;
                     if (CheckGameContext() == true)
                     {
-                        originalDifficultyModifier = Game1.player.difficultyModifier;
-                        Game1.player.difficultyModifier = 1.25f;
+                        if (this.Config.ProfitMarginEnabled == true)
+                        {
+                            Game1.player.difficultyModifier = 1f + this.Config.ProfitMarginValue;
+                        }
                     }
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
@@ -124,8 +173,10 @@ namespace MoreClocks
                     this.isGoldClockBuilt = true;
                     if (CheckGameContext() == true)
                     {
-                        originalDifficultyModifier = Game1.player.difficultyModifier;
-                        Game1.player.difficultyModifier = 1.25f;
+                        if (this.Config.ProfitMarginEnabled == true)
+                        {
+                            Game1.player.difficultyModifier = 1f + this.Config.ProfitMarginValue;
+                        }
                     }
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
@@ -145,8 +196,10 @@ namespace MoreClocks
                     this.isGoldClockBuilt = false;
                     if (CheckGameContext() == true)
                     {
-                        originalDifficultyModifier = Game1.player.difficultyModifier;
-                        Game1.player.difficultyModifier = 1f;
+                        if (this.Config.ProfitMarginEnabled == true)
+                        {
+                            Game1.player.difficultyModifier = this.originalDifficultyModifier;
+                        }
                     }
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
