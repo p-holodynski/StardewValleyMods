@@ -39,7 +39,7 @@ namespace MoreClocks
         private readonly float EPSILON = 0.01f;
         private List<string> machineNames;
         private uint machineUpdateInterval = 10;
-        private float machineTime = 75f;
+        private float machineTime = 100f;
         private ModConfig Config;
 
         /*********
@@ -80,6 +80,14 @@ namespace MoreClocks
             {
                 Game1.player.difficultyModifier = this.originalDifficultyModifier;
             }
+            if (this.Config.PlantAnySeasonEnabled == false)
+            {
+                Game1.getFarm().IsGreenhouse = false;
+            }
+            if (this.Config.MachineSpeedUpEnabled == true)
+            {
+                this.machineTime = this.machineTime - this.Config.MachineSpeedUpSpeedValue;
+            }
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -98,24 +106,143 @@ namespace MoreClocks
 
             configMenu.SetTitleScreenOnlyForNextOptions(mod: this.ModManifest, true);
 
+            // add General Section Title
+            configMenu.AddSectionTitle(
+                mod: this.ModManifest,
+                text: () => "General Options"
+            );
             // add some config options
             configMenu.AddBoolOption(
                 mod: this.ModManifest,
-                name: () => "Gold Clock Profit Margin Effect",
-                tooltip: () => "Enable the Gold Clock Profit Margin Effect",
+                name: () => "Notifications.",
+                tooltip: () => "Enable the notifications if any Clock effect occured overnight.",
+                getValue: () => this.Config.clockNotificationsEnabled,
+                setValue: value => this.Config.clockNotificationsEnabled = value
+            );
+
+            // add Gold Clock Section Title
+            configMenu.AddSectionTitle(
+                mod: this.ModManifest,
+                text: () => "Gold Clock Options"
+            );
+            // add some config options
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Profit Margin.",
+                tooltip: () => "Enable the Profit Margin effect.",
                 getValue: () => this.Config.ProfitMarginEnabled,
                 setValue: value => this.Config.ProfitMarginEnabled = value
             );
             configMenu.AddNumberOption(
                 mod: this.ModManifest,
-                name: () => "Profit Margin Value",
+                name: () => "Profit Margin Value.",
                 tooltip: () => "Percentage of Profit Margin: 0.25 means 25% more profits, 1 means 100% more(double) profits",
                 getValue: () => this.Config.ProfitMarginValue,
                 setValue: value => this.Config.ProfitMarginValue = value,
                 min: 0f,
                 max: 1f,
                 interval: 0.25f
-            );            
+            );
+            // add Iridium Clock Section Title
+            configMenu.AddSectionTitle(
+                mod: this.ModManifest,
+                text: () => "Iridium Clock Options"
+            );
+            // add some config options
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Plant Any Season.",
+                tooltip: () => "Enable the Plant Any Season effect.",
+                getValue: () => this.Config.PlantAnySeasonEnabled,
+                setValue: value => this.Config.PlantAnySeasonEnabled = value
+            );
+            // add some config options
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Machine Speed Up.",
+                tooltip: () => "Enable the Machine Speed Up effect.",
+                getValue: () => this.Config.MachineSpeedUpEnabled,
+                setValue: value => this.Config.MachineSpeedUpEnabled = value
+            );
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                name: () => "Machine Speed Up chance.",
+                tooltip: () => "Percentage that the Machine Speed Up will trigger overnight. From 0% to 100%.",
+                getValue: () => this.Config.MachineSpeedUpChanceValue,
+                setValue: value => this.Config.MachineSpeedUpChanceValue = value,
+                min: 0,
+                max: 100,
+                interval: 1
+            );
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                name: () => "Machine Speed Up value.",
+                tooltip: () => "The value of the Machine Speed Up effect. From 0% to 100%.",
+                getValue: () => this.Config.MachineSpeedUpSpeedValue,
+                setValue: value => this.Config.MachineSpeedUpSpeedValue = value,
+                min: 0,
+                max: 100,
+                interval: 1
+            );
+            // add Radioactive Clock Section Title
+            configMenu.AddSectionTitle(
+                mod: this.ModManifest,
+                text: () => "Radioactive Clock Options"
+            );
+            // add some config options
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Crop Grow overnight.",
+                tooltip: () => "Enable the Crop Grow effect.",
+                getValue: () => this.Config.CropGrowEnabled,
+                setValue: value => this.Config.CropGrowEnabled = value
+            );
+            // add some config options
+            //configMenu.AddTextOption(
+            //    mod: this.ModManifest,
+            //    name: () => "Crop Grow Method.",
+            //    tooltip: () => "Set the Crop Grow method. Completely means crop will become fully grown (ready to harvest) and Sequentially means crop will enter its next growth stage instead.",
+            //    getValue: () => this.Config.CropGrowMethod,
+            //    setValue: value => this.Config.CropGrowMethod = value,
+            //    allowedValues: new string[] { "Completely", "Sequentially" }
+            //);
+            // add some config options
+            configMenu.AddTextOption(
+                mod: this.ModManifest,
+                name: () => "Crop Grow Area.",
+                tooltip: () => "Set the Crop Grow effect to be trigger for each crop individualy or for all the crops on the farm.",
+                getValue: () => this.Config.CropGrowArea,
+                setValue: value => this.Config.CropGrowArea = value,
+                allowedValues: new string[] { "Individual", "Farm" }
+            );
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                name: () => "Crop Grow overnight chance.",
+                tooltip: () => "Percentage that the Crop Grow will trigger overnight. From 0% to 100%.",
+                getValue: () => this.Config.CropGrowChanceValue,
+                setValue: value => this.Config.CropGrowChanceValue = value,
+                min: 0,
+                max: 100,
+                interval: 1
+            );
+            // add some config options
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "Mutate to Giant Crop.",
+                tooltip: () => "Enable the Crop Mutate to Giant Crop effect.",
+                getValue: () => this.Config.CropMutateToGiantEnabled,
+                setValue: value => this.Config.CropMutateToGiantEnabled = value
+            );
+            configMenu.AddNumberOption(
+                mod: this.ModManifest,
+                name: () => "Mutate to Giant Crop chance.",
+                tooltip: () => "Percentage that the Crop Mutate to Giant Crop will trigger overnight. From 0% to 100%.",
+                getValue: () => this.Config.CropMutateToGiantChanceValue,
+                setValue: value => this.Config.CropMutateToGiantChanceValue = value,
+                min: 0,
+                max: 100,
+                interval: 1
+            );
         }
 
         /*********
@@ -143,7 +270,10 @@ namespace MoreClocks
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
                 {
-                    Game1.getFarm().IsGreenhouse = true;
+                    if (this.Config.PlantAnySeasonEnabled == true)
+                    {
+                        Game1.getFarm().IsGreenhouse = true;
+                    }
                     this.isIridiumClockBuilt = true;
                 }
                 if (building.buildingType.ToString() == "Radioactive Clock")
@@ -153,12 +283,18 @@ namespace MoreClocks
             }
             if (this.isIridiumClockTriggered == true)
             {
-                Game1.hudMessages.Add(new HUDMessage("Iridium Clock has speed up the machines overnight", 2));
+                if (this.Config.clockNotificationsEnabled == true)
+                {
+                    Game1.hudMessages.Add(new HUDMessage("Iridium Clock has speed up the machines overnight", 2));
+                }
                 this.isIridiumClockTriggered = false;
             }
             if (this.isRadioactiveClockTriggered == true)
             {
-                Game1.hudMessages.Add(new HUDMessage("Radioactive Clock has mutated some crops overnight", 2));
+                if (this.Config.clockNotificationsEnabled == true)
+                {
+                    Game1.hudMessages.Add(new HUDMessage("Radioactive Clock has mutated some crops overnight", 2));
+                }
                 this.isRadioactiveClockTriggered = false;
             }
         }
@@ -181,7 +317,10 @@ namespace MoreClocks
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
                 {
-                    Game1.getFarm().IsGreenhouse = true;
+                    if (this.Config.PlantAnySeasonEnabled == true)
+                    {
+                        Game1.getFarm().IsGreenhouse = true;
+                    }
                     this.isIridiumClockBuilt = true;
                 }
                 if (building.buildingType.ToString() == "Radioactive Clock")
@@ -196,10 +335,7 @@ namespace MoreClocks
                     this.isGoldClockBuilt = false;
                     if (CheckGameContext() == true)
                     {
-                        if (this.Config.ProfitMarginEnabled == true)
-                        {
-                            Game1.player.difficultyModifier = this.originalDifficultyModifier;
-                        }
+                        Game1.player.difficultyModifier = this.originalDifficultyModifier;
                     }
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
@@ -222,41 +358,98 @@ namespace MoreClocks
         {
             if (this.isIridiumClockBuilt == true)
             {
-                var chanceToSpeedUpMachines = this.randomvalue.Next(0, 100);
-                if (chanceToSpeedUpMachines < 25) // 25% chance to trigger
+                if (this.Config.MachineSpeedUpEnabled == true)
                 {
-                    SpeedUpAllMachines();
-                    this.isIridiumClockTriggered = true;
-                    //this.Monitor.Log("IridiumClockTriggered Machine Speed Up", LogLevel.Debug);
-                }
+                    var chanceToSpeedUpMachines = this.randomvalue.Next(0, 100);
+                    if (chanceToSpeedUpMachines < this.Config.MachineSpeedUpChanceValue) // % chance to trigger
+                    {
+                        SpeedUpAllMachines();
+                        this.isIridiumClockTriggered = true;
+                    }
+                } 
             }
             if (this.isRadioactiveClockBuilt == true) {
                 GameLocation location = Game1.getFarm();
-                foreach (var pair in location.terrainFeatures.Pairs)
+                if (this.Config.CropGrowEnabled == true)
                 {
-                    if (pair.Value is HoeDirt)
+                    // Triggers for each crop individualy
+                    if (this.Config.CropGrowArea == "Individual")
                     {
-                        var dirt = pair.Value as HoeDirt;
-                        // A state of 1 for dirt means it's watered.
-                        if (dirt.crop != null && !dirt.crop.dead.Value && dirt.state.Value == HoeDirt.watered)
+                        foreach (var pair in location.terrainFeatures.Pairs)
                         {
-                            var randomChance = this.randomvalue.Next(0, 100);
-                            if (randomChance < 25) // 25% chance to trigger
+                            if (pair.Value is HoeDirt)
                             {
-                                if (dirt.crop.currentPhase.Value != dirt.crop.phaseDays.Count - 1)
+                                var dirt = pair.Value as HoeDirt;
+                                // A state of 1 for dirt means it's watered.
+                                if (dirt.crop != null && !dirt.crop.dead.Value && dirt.state.Value == HoeDirt.watered)
                                 {
-                                    dirt.crop.growCompletely();
-                                    this.isRadioactiveClockTriggered = true;
+                                    var randomChance = this.randomvalue.Next(0, 100);
+                                    if (randomChance < this.Config.CropGrowChanceValue) // % chance to trigger
+                                    {
+                                        if (dirt.crop.currentPhase.Value != dirt.crop.phaseDays.Count - 1)
+                                        {
+                                            if (this.Config.CropGrowMethod == "Completely")
+                                            {
+                                                dirt.crop.growCompletely();
+                                            }
+                                            // CURRENTLY NOT WORKING !! maybe its the fault of updateDrawMath because its called at the end of the day?
+                                            //if (this.Config.CropGrowMethod == "Sequentially")
+                                            //{
+                                                //increase crop's current phase by 1 and update draw math to display current crop phase
+                                                //dirt.crop.currentPhase.Set(dirt.crop.currentPhase.Get() + 1);
+                                                //this.Monitor.Log($"currentTileLocation: {pair.Value.currentTileLocation}", LogLevel.Debug);
+                                                //this.Monitor.Log($"dirt new vector: {new Vector2(dirt.currentTileLocation.X, dirt.currentTileLocation.Y)}", LogLevel.Debug);
+                                                //dirt.crop.updateDrawMath(new Vector2(dirt.currentTileLocation.X, dirt.currentTileLocation.Y));
+                                            //}
+                                            this.isRadioactiveClockTriggered = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Triggers for all crops on the farm
+                    if (this.Config.CropGrowArea == "Farm")
+                    {
+                        var randomChance = this.randomvalue.Next(0, 100);
+                        if (randomChance < this.Config.CropGrowChanceValue) // % chance to trigger
+                        {
+                            foreach (var pair in location.terrainFeatures.Pairs)
+                            {
+                                if (pair.Value is HoeDirt)
+                                {
+                                    var dirt = pair.Value as HoeDirt;
+                                    // A state of 1 for dirt means it's watered.
+                                    if (dirt.crop != null && !dirt.crop.dead.Value && dirt.state.Value == HoeDirt.watered)
+                                    {
+                                        if (dirt.crop.currentPhase.Value != dirt.crop.phaseDays.Count - 1)
+                                        {
+                                            if (this.Config.CropGrowMethod == "Completely")
+                                            {
+                                                dirt.crop.growCompletely();
+                                            }
+                                            //if (this.Config.CropGrowMethod == "Sequentially")
+                                            //{
+                                                //increase crop's current phase by 1 and update draw math to display current crop phase
+                                                //dirt.crop.currentPhase.Set(dirt.crop.currentPhase.Get() + 1);
+                                                //dirt.crop.updateDrawMath(pair.Value.currentTileLocation);
+                                            //}
+                                            this.isRadioactiveClockTriggered = true;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                var chanceToTurnIntoGiantCrop = this.randomvalue.Next(0, 100);
-                if (chanceToTurnIntoGiantCrop < 25) // 25% chance to trigger
+                if (this.Config.CropMutateToGiantEnabled == true)
                 {
-                    MutateCrops(chanceToTurnIntoGiantCrop, location);
-                    this.isRadioactiveClockTriggered = true;
+                    var chanceToTurnIntoGiantCrop = this.randomvalue.Next(0, 100);
+                    if (chanceToTurnIntoGiantCrop < this.Config.CropMutateToGiantChanceValue) // % chance to trigger
+                    {
+                        MutateCrops(this.Config.CropMutateToGiantChanceValue, location);
+                        this.isRadioactiveClockTriggered = true;
+                    }
                 }
             }
         }
@@ -363,12 +556,9 @@ namespace MoreClocks
         {
             if (e.NewMenu is CarpenterMenu carp)
             {
-                //if (this.isGoldClockBuilt == true)
-                //{
-                    var blueprints = this.Helper.Reflection.GetField<List<BluePrint>>(carp, "blueprints").GetValue();
-                    blueprints.Add(new BluePrint("Iridium Clock"));
-                    blueprints.Add(new BluePrint("Radioactive Clock"));
-                //}
+                var blueprints = this.Helper.Reflection.GetField<List<BluePrint>>(carp, "blueprints").GetValue();
+                blueprints.Add(new BluePrint("Iridium Clock"));
+                blueprints.Add(new BluePrint("Radioactive Clock"));
             }
         }
 
@@ -493,8 +683,8 @@ namespace MoreClocks
 
         public void Edit<T>(IAssetData asset)
         {
-            asset.AsDictionary<string, string>().Data.Add("Iridium Clock", "337 100/3/2/-1/-1/-2/-1/null/Iridium Clock/All seeds are plantable regardless of the season. 25% chance overnight to Speed Up machines./Buildings/none/48/80/-1/null/Farm/10000000/true");
-            asset.AsDictionary<string, string>().Data.Add("Radioactive Clock", "910 100/3/2/-1/-1/-2/-1/null/Radioactive Clock/Crops have a 25% chance to fully grow overnight. Giant Crops spawn more often./Buildings/none/48/80/-1/null/Farm/10000000/true");
+            asset.AsDictionary<string, string>().Data.Add("Iridium Clock", "337 100/3/2/-1/-1/-2/-1/null/Iridium Clock/All seeds are plantable regardless of the season. Chance to Speed Up machines overnight./Buildings/none/48/80/-1/null/Farm/10000000/true");
+            asset.AsDictionary<string, string>().Data.Add("Radioactive Clock", "910 100/3/2/-1/-1/-2/-1/null/Radioactive Clock/Crops have a chance to fully grow overnight. Giant Crops spawn more often./Buildings/none/48/80/-1/null/Farm/10000000/true");
         }
 
         public bool CanLoad<T>(IAssetInfo asset)
