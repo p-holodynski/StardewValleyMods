@@ -198,14 +198,14 @@ namespace MoreClocks
                 setValue: value => this.Config.CropGrowEnabled = value
             );
             // add some config options
-            //configMenu.AddTextOption(
-            //    mod: this.ModManifest,
-            //    name: () => "Crop Grow Method.",
-            //    tooltip: () => "Set the Crop Grow method. Completely means crop will become fully grown (ready to harvest) and Sequentially means crop will enter its next growth stage instead.",
-            //    getValue: () => this.Config.CropGrowMethod,
-            //    setValue: value => this.Config.CropGrowMethod = value,
-            //    allowedValues: new string[] { "Completely", "Sequentially" }
-            //);
+            configMenu.AddTextOption(
+                mod: this.ModManifest,
+                name: () => "Crop Grow Method.",
+                tooltip: () => "Set the Crop Grow method. Completely means crop will become fully grown (ready to harvest) and Sequentially means crop will enter its next growth stage instead.",
+                getValue: () => this.Config.CropGrowMethod,
+                setValue: value => this.Config.CropGrowMethod = value,
+                allowedValues: new string[] { "Completely", "Sequentially" }
+            );
             // add some config options
             configMenu.AddTextOption(
                 mod: this.ModManifest,
@@ -392,15 +392,12 @@ namespace MoreClocks
                                             {
                                                 dirt.crop.growCompletely();
                                             }
-                                            // CURRENTLY NOT WORKING !! maybe its the fault of updateDrawMath because its called at the end of the day?
-                                            //if (this.Config.CropGrowMethod == "Sequentially")
-                                            //{
+                                            if (this.Config.CropGrowMethod == "Sequentially")
+                                            {
+                                                //this.Monitor.Log($"crop phase: {dirt.crop.currentPhase.Get()} before", LogLevel.Debug);
                                                 //increase crop's current phase by 1 and update draw math to display current crop phase
-                                                //dirt.crop.currentPhase.Set(dirt.crop.currentPhase.Get() + 1);
-                                                //this.Monitor.Log($"currentTileLocation: {pair.Value.currentTileLocation}", LogLevel.Debug);
-                                                //this.Monitor.Log($"dirt new vector: {new Vector2(dirt.currentTileLocation.X, dirt.currentTileLocation.Y)}", LogLevel.Debug);
-                                                //dirt.crop.updateDrawMath(new Vector2(dirt.currentTileLocation.X, dirt.currentTileLocation.Y));
-                                            //}
+                                                dirt.crop.currentPhase.Set(dirt.crop.currentPhase.Get() + 1);
+                                            }
                                             this.isRadioactiveClockTriggered = true;
                                         }
                                     }
@@ -428,12 +425,11 @@ namespace MoreClocks
                                             {
                                                 dirt.crop.growCompletely();
                                             }
-                                            //if (this.Config.CropGrowMethod == "Sequentially")
-                                            //{
+                                            if (this.Config.CropGrowMethod == "Sequentially")
+                                            {
                                                 //increase crop's current phase by 1 and update draw math to display current crop phase
-                                                //dirt.crop.currentPhase.Set(dirt.crop.currentPhase.Get() + 1);
-                                                //dirt.crop.updateDrawMath(pair.Value.currentTileLocation);
-                                            //}
+                                                dirt.crop.currentPhase.Set(dirt.crop.currentPhase.Get() + 1);
+                                            }
                                             this.isRadioactiveClockTriggered = true;
                                         }
                                     }
