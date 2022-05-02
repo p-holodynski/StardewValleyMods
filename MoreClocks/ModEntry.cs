@@ -16,7 +16,7 @@ using StardewValley.Menus;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
 using StardewValley.Objects;
-using MoreClocks.GenericModConfigMenu;
+using GenericModConfigMenu;
 
 namespace MoreClocks
 {
@@ -35,7 +35,7 @@ namespace MoreClocks
         private bool isRadioactiveClockBuilt = false;
         private bool isRadioactiveClockTriggered = false;
         private Random randomvalue;
-        private float originalDifficultyModifier = 1f;
+        private float originalDifficultyModifier;
         private readonly float EPSILON = 0.01f;
         private List<string> machineNames;
         private uint machineUpdateInterval = 10;
@@ -64,8 +64,7 @@ namespace MoreClocks
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
-            helper.Events.GameLoop.UpdateTicking += this.OnUpdateTicking;
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.GameLoop.SaveCreated += this.OnSaveCreated;
 
             this.iridiumClockTexture = this.Helper.Content.Load<Texture2D>("assets/IridiumClock.png");
             this.radioactiveClockTexture = this.Helper.Content.Load<Texture2D>("assets/RadioactiveClock.png");
@@ -76,18 +75,17 @@ namespace MoreClocks
                 "Preserves Jar", "Recycling Machine", "Seed Maker", "Slime Egg-Press", "Slime Incubator",
                 "Tapper", "Worm Bin"};
 
-            if (this.Config.ProfitMarginEnabled == false)
-            {
-                Game1.player.difficultyModifier = this.originalDifficultyModifier;
-            }
-            if (this.Config.PlantAnySeasonEnabled == false)
-            {
-                Game1.getFarm().IsGreenhouse = false;
-            }
-            if (this.Config.MachineSpeedUpEnabled == true)
-            {
-                this.machineTime = this.machineTime - this.Config.MachineSpeedUpSpeedValue;
-            }
+            this.machineTime = this.machineTime - this.Config.MachineSpeedUpSpeedValue;
+        }
+
+        private void OnSaveCreated(object sender, SaveCreatedEventArgs e)
+        {
+            this.originalDifficultyModifier = Game1.player.difficultyModifier;
+        }
+
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
+            this.originalDifficultyModifier = Game1.player.difficultyModifier;
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -260,12 +258,9 @@ namespace MoreClocks
                 if (building.buildingType.ToString() == "Gold Clock")
                 {
                     this.isGoldClockBuilt = true;
-                    if (CheckGameContext() == true)
+                    if (this.Config.ProfitMarginEnabled == true)
                     {
-                        if (this.Config.ProfitMarginEnabled == true)
-                        {
-                            Game1.player.difficultyModifier = 1f + this.Config.ProfitMarginValue;
-                        }
+                        Game1.player.difficultyModifier = 1f + this.Config.ProfitMarginValue;
                     }
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
@@ -307,12 +302,9 @@ namespace MoreClocks
                 if (building.buildingType.ToString() == "Gold Clock")
                 {
                     this.isGoldClockBuilt = true;
-                    if (CheckGameContext() == true)
+                    if (this.Config.ProfitMarginEnabled == true)
                     {
-                        if (this.Config.ProfitMarginEnabled == true)
-                        {
-                            Game1.player.difficultyModifier = 1f + this.Config.ProfitMarginValue;
-                        }
+                        Game1.player.difficultyModifier = 1f + this.Config.ProfitMarginValue;
                     }
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
@@ -333,10 +325,7 @@ namespace MoreClocks
                 if (building.buildingType.ToString() == "Gold Clock")
                 {
                     this.isGoldClockBuilt = false;
-                    if (CheckGameContext() == true)
-                    {
-                        Game1.player.difficultyModifier = this.originalDifficultyModifier;
-                    }
+                    Game1.player.difficultyModifier = this.originalDifficultyModifier;
                 }
                 if (building.buildingType.ToString() == "Iridium Clock")
                 {
@@ -452,25 +441,7 @@ namespace MoreClocks
 
         private void OnSaving(object sender, SavingEventArgs args)
         {
-            if (CheckGameContext() == true)
-            {
-                Game1.player.difficultyModifier = originalDifficultyModifier;
-            }
-        }
-
-        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
-        {
-            //if (CheckGameContext() == true) {
-                //SpeedUpAllMachines();
-            //}
-        }
-
-        private void OnUpdateTicking(object sender, UpdateTickingEventArgs e)
-        {
-            //if (CheckGameContext() == true)
-            //{
-                //SpeedUpAllMachines();
-            //}
+            Game1.player.difficultyModifier = this.originalDifficultyModifier;
         }
 
         // Checks if the crops are fully grown and can become a Giant Crop
@@ -556,33 +527,6 @@ namespace MoreClocks
                 blueprints.Add(new BluePrint("Iridium Clock"));
                 blueprints.Add(new BluePrint("Radioactive Clock"));
             }
-        }
-
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-            //if (!Context.IsPlayerFree || Game1.currentMinigame != null)
-            //    return;
-
-            //// Reload config
-            //if (e.Button.ToString() == "Z")
-            //{
-            //    Game1.hudMessages.Add(new HUDMessage("Machine Speed Configuration Reloaded", 2));
-            //    SpeedUpAllMachines();
-            //}
-        }
-
-        // Check if the game is in Single Player
-        private bool CheckGameContext()
-        {
-            if (!Context.IsMainPlayer)
-            {
-                return false;
-            }
-            else if (Context.IsMultiplayer)
-            {
-                return false;
-            }
-            return true;
         }
 
         // Sweep through all the machines in the world and speeds them up.
