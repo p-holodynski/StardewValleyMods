@@ -66,8 +66,22 @@ namespace MoreClocks
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.SaveCreated += this.OnSaveCreated;
 
-            this.iridiumClockTexture = this.Helper.Content.Load<Texture2D>("assets/IridiumClock.png");
-            this.radioactiveClockTexture = this.Helper.Content.Load<Texture2D>("assets/RadioactiveClock.png");
+            try
+            {
+                this.iridiumClockTexture = this.Helper.Content.Load<Texture2D>($"assets/{this.Config.IridiumClockCustomTexture}.png");
+            }
+            catch
+            {
+                this.iridiumClockTexture = this.Helper.Content.Load<Texture2D>("assets/IridiumClock.png");
+            }
+            try
+            {
+                this.radioactiveClockTexture = this.Helper.Content.Load<Texture2D>($"assets/{this.Config.RadioactiveClockCustomTexture}.png");
+            }
+            catch
+            {
+                this.radioactiveClockTexture = this.Helper.Content.Load<Texture2D>("assets/RadioactiveClock.png");
+            }
             this.randomvalue = new Random();
             this.machineNames = new List<string> {
                 "Bee House", "Cask", "Charcoal Kiln", "Cheese Press", "Crystalarium",
